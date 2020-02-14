@@ -21,25 +21,23 @@ crun-omp: $(CFILES) $(HFILES)
 
 demo1: grun.py
 	@echo "Running Python simulator with text visualization.  Synchronous mode."
-	./grun.py -g data/g-018x012-fracY.gph -r data/r-018x012-c5.rats -n 20 -u s -v a -p 0.5
+	./grun.py -g data/g-018x012-fracY.gph -r data/r-018x012-c5.rats -n 10 -u s -v a -p 0.5
 
 demo2: grun.py
 	@echo "Running Python simulator with heat-map visualization.  Synchronous mode"
+	./grun.py -g data/g-036x032-fracZ.gph -r data/r-036x032-c10.rats -u s -n 10 -v h
+
+demo3: crun-seq grun.py
+	@echo "Running C simulator using Python simulator as visualizer. Synchronous mode"
 	@echo "Note the oscillatory behavior"
-	./grun.py -g data/g-036x032-fracZ.gph -r data/r-036x032-c10.rats -u s -n 20 -v h
+	./crun-seq -g data/g-036x032-fracZ.gph -r data/r-036x032-c10.rats -u s -n 20 | ./grun.py -d -v h
 
-demo3: grun.py
-	@echo "Running Python simulator with heat-map visualization.  Rat-order mode"
-	@echo "Note the smooth transitions"
-	./grun.py -g data/g-036x032-fracZ.gph -r data/r-036x032-c10.rats -u r -n 20 -v h
-
-demo4: grun.py
-	@echo "Running Python simulator with heat-map visualization.  Batch mode"
-	@echo "Note the smooth transitions"
-	./grun.py -g data/g-036x032-fracZ.gph -r data/r-036x032-c10.rats -u b -n 20 -v h
+demo4: crun-seq grun.py
+	@echo "Rat-order mode.  Note the smooth transitions"
+	./crun-seq -g data/g-036x032-fracZ.gph -r data/r-036x032-c10.rats -u r -n 20 | ./grun.py -d -v h
 
 demo5: crun-seq grun.py
-	@echo "Running C simulator using Python simulator as visualizer"
+	@echo "Batch mode. Note the smooth transitions"
 	./crun-seq -g data/g-036x032-fracZ.gph -r data/r-036x032-c10.rats -u b -n 20 | ./grun.py -d -v h
 
 demo6: crun-seq grun.py
