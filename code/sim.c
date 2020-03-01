@@ -61,14 +61,29 @@ static inline void take_census(state_t *s) {
 
 /* Recompute all node weights */
 static inline void compute_all_weights(state_t *s) {
+    int i;
     graph_t *g = s->g;
     double *node_weight = s->node_weight;
 
     START_ACTIVITY(ACTIVITY_WEIGHTS);
     int nid;
-    for (nid = 0; nid < g->nnode; nid++)
-	node_weight[nid] = compute_weight(s, nid);
+    #if OMP
+    #pragma omp for nowait
+    for(i = 0; i < g->numhubs; i++){
+        int hubid = g->hub[i];
+        node_weight[hubid]=compute_weight(s, hubid);
+    }
+    #pragma omp for 
+    for (nid = 0; nid < g->nnode; nid++){
+        int start = g->neighbor_start[nid];
+        int end = g->neighbor_start[nid+1];
+        if(end - start <= 8){
+            node_weight[nid] = compute_weight(s, nid);
+
+        }
+    }
     FINISH_ACTIVITY(ACTIVITY_WEIGHTS);
+    #endif
 }
 
 /* Precompute sums for each region */
@@ -76,6 +91,8 @@ static inline void find_all_sums(state_t *s) {
     graph_t *g = s->g;
     START_ACTIVITY(ACTIVITY_SUMS);
     int nid, eid;
+    #if OMP
+    #pragma omp for
     for (nid = 0; nid < g->nnode; nid++) {
 	double sum = 0.0;
 	for (eid = g->neighbor_start[nid]; eid < g->neighbor_start[nid+1]; eid++) {
@@ -84,6 +101,7 @@ static inline void find_all_sums(state_t *s) {
 	}
 	s->sum_weight[nid] = sum;
     }
+    #endif
     FINISH_ACTIVITY(ACTIVITY_SUMS);
 }
 
@@ -157,28 +175,38 @@ static inline void do_batch(state_t *s, int bstart, int bcount) {
     int ni, ri;
     graph_t *g = s->g;
     int nnode = g->nnode;
-    find_all_sums(s);
 
+
+#if OMP
+#pragma omp parallel
+{
+    find_all_sums(s);
     START_ACTIVITY(ACTIVITY_NEXT);
+    #pragma omp for
     for (ri = 0; ri < bcount; ri++) {
 	int rid = ri+bstart;
 	int onid = s->rat_position[rid];
 	int nnid = fast_next_random_move(s, rid);
 	s->rat_position[rid] = nnid;
+    #pragma omp atomic 
 	s->delta_rat_count[onid] -= 1;
+    #pragma omp atomic
 	s->delta_rat_count[nnid] += 1;
     }
 
     /* Must first update all rat counts and then recompute weights */
+    #pragma omp for
     for (ni = 0; ni < nnode; ni++) {
 	s->rat_count[ni] += s->delta_rat_count[ni];
-	// Clear count for future use
+	// Clear count for future use 
 	s->delta_rat_count[ni] = 0;
     }
     FINISH_ACTIVITY(ACTIVITY_NEXT);
 
     /* Update weights */
     compute_all_weights(s);
+}
+#endif
 }
 
 static void batch_step(state_t *s) {
