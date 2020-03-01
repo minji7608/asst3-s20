@@ -54,9 +54,19 @@ static inline void take_census(state_t *s) {
     int *rat_count = s->rat_count;
     int nrat = s->nrat;
     int ri;
-    for (ri = 0; ri < nrat; ri++) {
-	rat_count[rat_position[ri]]++;
+
+    int delta_rat_count[nrat];
+
+    #if OMP
+    #pragma omp parallel
+    {
+        #pragma omp for
+        for (ri = 0; ri < nrat; ri++) {
+            #pragma omp atomic
+            rat_count[rat_position[ri]]++;
+        }
     }
+    #endif
 }
 
 /* Recompute all node weights */
@@ -71,7 +81,7 @@ static inline void compute_all_weights(state_t *s) {
     #pragma omp for nowait
     for(i = 0; i < g->numhubs; i++){
         int hubid = g->hub[i];
-        node_weight[hubid]=compute_weight(s, hubid);
+        node_weight[hubid] = compute_weight(s, hubid);
     }
     #pragma omp for 
     for (nid = 0; nid < g->nnode; nid++){
@@ -79,7 +89,6 @@ static inline void compute_all_weights(state_t *s) {
         int end = g->neighbor_start[nid+1];
         if(end - start <= 8){
             node_weight[nid] = compute_weight(s, nid);
-
         }
     }
     FINISH_ACTIVITY(ACTIVITY_WEIGHTS);
@@ -91,19 +100,25 @@ static inline void find_all_sums(state_t *s) {
     graph_t *g = s->g;
     START_ACTIVITY(ACTIVITY_SUMS);
     int nid, eid;
+    int i;
     #if OMP
     #pragma omp for
     for (nid = 0; nid < g->nnode; nid++) {
-	double sum = 0.0;
-	for (eid = g->neighbor_start[nid]; eid < g->neighbor_start[nid+1]; eid++) {
-	    sum += s->node_weight[g->neighbor[eid]];
-	    s->neighbor_accum_weight[eid] = sum;
-	}
-	s->sum_weight[nid] = sum;
+	    double sum = 0.0;
+        int start = g->neighbor_start[nid];
+        int end = g->neighbor_start[nid+1];
+	    for (eid = g->neighbor_start[nid]; eid < g->neighbor_start[nid+1]; eid++) {
+	        sum += s->node_weight[g->neighbor[eid]];
+	        s->neighbor_accum_weight[eid] = sum;
+	    }
+	    s->sum_weight[nid] = sum;
+        }
     }
     #endif
     FINISH_ACTIVITY(ACTIVITY_SUMS);
 }
+
+
 
 /*
   Given list of increasing numbers, and target number,
@@ -236,7 +251,14 @@ double simulate(state_t *s, int count, update_t update_mode, int dinterval, bool
     bool show_counts = true;
     double start = currentSeconds();
     take_census(s);
+
+    #if OMP
+    #pragma omp parallel
+    {
     compute_all_weights(s);
+    }
+
+    #endif
     if (display)
 	show(s, show_counts);
 
