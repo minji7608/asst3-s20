@@ -55,18 +55,11 @@ static inline void take_census(state_t *s) {
     int nrat = s->nrat;
     int ri;
 
-    int delta_rat_count[nrat];
 
-    #if OMP
-    #pragma omp parallel
-    {
-        #pragma omp for
-        for (ri = 0; ri < nrat; ri++) {
-            #pragma omp atomic
-            rat_count[rat_position[ri]]++;
-        }
+    for (ri = 0; ri < nrat; ri++) {
+        rat_count[rat_position[ri]]++;
     }
-    #endif
+
 }
 
 /* Recompute all node weights */
@@ -112,8 +105,8 @@ static inline void find_all_sums(state_t *s) {
 	        s->neighbor_accum_weight[eid] = sum;
 	    }
 	    s->sum_weight[nid] = sum;
-        }
     }
+    
     #endif
     FINISH_ACTIVITY(ACTIVITY_SUMS);
 }
@@ -193,34 +186,39 @@ static inline void do_batch(state_t *s, int bstart, int bcount) {
 
 
 #if OMP
-#pragma omp parallel
-{
+
     find_all_sums(s);
     START_ACTIVITY(ACTIVITY_NEXT);
+#pragma omp parallel
+{
+    
     #pragma omp for
     for (ri = 0; ri < bcount; ri++) {
-	int rid = ri+bstart;
-	int onid = s->rat_position[rid];
-	int nnid = fast_next_random_move(s, rid);
-	s->rat_position[rid] = nnid;
-    #pragma omp atomic 
-	s->delta_rat_count[onid] -= 1;
-    #pragma omp atomic
-	s->delta_rat_count[nnid] += 1;
+        int rid = ri+bstart;
+        int onid = s->rat_position[rid];
+        int nnid = fast_next_random_move(s, rid);
+        s->rat_position[rid] = nnid;
+       
+        // #pragma omp atomic 
+        s->delta_rat_count[onid] -= 1;
+        
+        // #pragma omp atomic
+        s->delta_rat_count[nnid] += 1;
     }
 
     /* Must first update all rat counts and then recompute weights */
-    #pragma omp for
+    #pragma omp for 
     for (ni = 0; ni < nnode; ni++) {
-	s->rat_count[ni] += s->delta_rat_count[ni];
-	// Clear count for future use 
-	s->delta_rat_count[ni] = 0;
+	    s->rat_count[ni] += s->delta_rat_count[ni];
+	    // Clear count for future use 
+	    s->delta_rat_count[ni] = 0;
     }
+}
     FINISH_ACTIVITY(ACTIVITY_NEXT);
 
     /* Update weights */
     compute_all_weights(s);
-}
+
 #endif
 }
 
@@ -255,7 +253,7 @@ double simulate(state_t *s, int count, update_t update_mode, int dinterval, bool
     #if OMP
     #pragma omp parallel
     {
-    compute_all_weights(s);
+        compute_all_weights(s);
     }
 
     #endif
