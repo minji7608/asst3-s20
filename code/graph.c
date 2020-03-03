@@ -91,45 +91,51 @@ graph_t *read_graph(FILE *infile) {
 	g->ilf[i] = ilf;
     }
     for (i = 0; i < nedge; i++) {
-	while (fgets(linebuf, MAXLINE, infile) != NULL) {
-	    lineno++;
-	    if (!is_comment(linebuf))
-		break;
-	}
-	if (sscanf(linebuf, "e %d %d", &hid, &tid) != 2) {
-	    outmsg("Line #%d of graph file malformed.  Expecting edge %d\n", lineno, i+1);
-	    return false;
-	}
-	if (hid < 0 || hid >= nnode) {
-	    outmsg("Invalid head index %d on line %d\n", hid, lineno);
-	    return false;
-	}
-	if (tid < 0 || tid >= nnode) {
-	    outmsg("Invalid tail index %d on line %d\n", tid, lineno);
-	    return false;
-	}
-	if (hid < nid) {
-	    outmsg("Head index %d on line %d out of order\n", hid, lineno);
-	    return false;
-	    
-	}
+		while (fgets(linebuf, MAXLINE, infile) != NULL) {
+			lineno++;
+			if (!is_comment(linebuf))
+				break;
+		}
+		if (sscanf(linebuf, "e %d %d", &hid, &tid) != 2) {
+			outmsg("Line #%d of graph file malformed.  Expecting edge %d\n", lineno, i+1);
+			return false;
+		}
+		if (hid < 0 || hid >= nnode) {
+			outmsg("Invalid head index %d on line %d\n", hid, lineno);
+			return false;
+		}
+		if (tid < 0 || tid >= nnode) {
+			outmsg("Invalid tail index %d on line %d\n", tid, lineno);
+			return false;
+		}
+		if (hid < nid) {
+			outmsg("Head index %d on line %d out of order\n", hid, lineno);
+			return false;
+			
+		}
+	
 	// Starting edges for new node(s)
 	while (nid < hid) {
 	    nid++;
 	    g->neighbor_start[nid] = eid;
-		if(eid-prevstart > 8){
-			g->hub[numhub++]=g->neighbor[prevstart];
+			
+		// if it's a hub 
+		if(eid-prevstart > 100){
+			g->hub[numhub++] = g->neighbor[prevstart];
+		}
 
-		}
+		// if it's not a hub
 		else{
-			g->hub[numnonhub--]=g->neighbor[prevstart];
+			g->hub[numnonhub--] = g->neighbor[prevstart];
 		}
+
 		prevstart = eid;
 	    // Self edge
 	    g->neighbor[eid++] = nid;
 	}
 	g->neighbor[eid++] = tid;
-    }
+  }
+
     while (nid < nnode-1) {
 	// Fill out any isolated nodes
 	nid++;

@@ -126,6 +126,7 @@ typedef struct {
 
     // Accumulate changes in rat counts in batch mode.  Length = N
     int *delta_rat_count;
+    int *scratch_array;
 } state_t;
     
 

@@ -64,26 +64,27 @@ static inline void take_census(state_t *s) {
 
 /* Recompute all node weights */
 static inline void compute_all_weights(state_t *s) {
-    int i;
     graph_t *g = s->g;
     double *node_weight = s->node_weight;
     int nnode = g->nnode;
 
     START_ACTIVITY(ACTIVITY_WEIGHTS);
-    int nid;
+    
 
     #if OMP
     #pragma omp parallel
     {
+        int nid;
+        graph_t *gl = s->g;
         #pragma omp for 
-        for (nid = g->numhubs; nid < nnode; nid++){
-            int nonhubid = g->hub[nid];
+        for (nid = gl->numhubs; nid < nnode; nid++){
+            int nonhubid = gl->hub[nid];
             node_weight[nonhubid]= compute_weight(s, nonhubid);
         }
 
         #pragma omp for 
-        for(i = 0; i < g->numhubs; i++){
-            int hubid = g->hub[i];
+        for(nid = 0; nid < gl->numhubs; nid++){
+            int hubid = gl->hub[nid];
             node_weight[hubid] = compute_weight(s, hubid);
         }
 
@@ -98,32 +99,34 @@ static inline void compute_all_weights(state_t *s) {
 static inline void find_all_sums(state_t *s) {
     graph_t *g = s->g;
     START_ACTIVITY(ACTIVITY_SUMS);
-    int nid, eid;
+    
     int nnode = g->nnode;
     int i;
     #if OMP
     #pragma omp parallel
     {
-        #pragma omp for 
-        for (nid = g->numhubs; nid < nnode; nid++) {
-        double sum = 0.0;
-        int nonhubid = g->hub[nid];
-        for (eid = g->neighbor_start[nonhubid]; eid < g->neighbor_start[nonhubid+1]; eid++) {
-            sum += s->node_weight[g->neighbor[eid]];
-            s->neighbor_accum_weight[eid] = sum;
-        }
-        s->sum_weight[nonhubid] = sum;
+        int nid, eid;
+        graph_t *gl = s->g;
+        #pragma omp for nowait
+        for (nid = gl->numhubs; nid < nnode; nid++) {
+            double sum = 0.0;
+            int nonhubid = gl->hub[nid];
+            for (eid = gl->neighbor_start[nonhubid]; eid < gl->neighbor_start[nonhubid+1]; eid++) {
+                sum += s->node_weight[g->neighbor[eid]];
+                s->neighbor_accum_weight[eid] = sum;
+            }
+            s->sum_weight[nonhubid] = sum;
         }
 
-        #pragma omp for 
-        for (i = 0; i < g->numhubs; i++){
-        double sum = 0.0;
-        int hubid = g->hub[i];
-        for (eid = g->neighbor_start[hubid]; eid < g->neighbor_start[hubid+1]; eid++) {
-            sum += s->node_weight[g->neighbor[eid]];
-            s->neighbor_accum_weight[eid] = sum;
-        } 
-        s->sum_weight[hubid]=sum; 
+        #pragma omp for schedule(dynamic) nowait
+        for (nid = 0; nid < gl->numhubs; nid++){
+            double sum = 0.0;
+            int hubid = gl->hub[nid];
+            for (eid = gl->neighbor_start[hubid]; eid < gl->neighbor_start[hubid+1]; eid++) {
+                sum += s->node_weight[g->neighbor[eid]];
+                s->neighbor_accum_weight[eid] = sum;
+            } 
+            s->sum_weight[hubid]=sum; 
         }
 
     }
@@ -201,9 +204,9 @@ static inline int fast_next_random_move(state_t *s, int r) {
 
 /* Process single batch */
 static inline void do_batch(state_t *s, int bstart, int bcount) {
-    int ni, ri;
-    graph_t *g = s->g;
-    int nnode = g->nnode;
+    
+    
+    
 
 
     
@@ -211,29 +214,70 @@ static inline void do_batch(state_t *s, int bstart, int bcount) {
     find_all_sums(s);
     START_ACTIVITY(ACTIVITY_NEXT);
     #if OMP
+    graph_t *g = s->g;
+    int nnode = g->nnode;
+    // int *delta_rat_count = s->delta_rat_count;
+    
+    int *delta_rat_count;
     #pragma omp parallel
     {
+        int ni, ri, ti;
+
+        // const int nthreads = omp_get_num_threads();
+        
+
+        // #pragma omp single
+        // delta_rat_count = new int[nnode*nthreads];
+        
+        // #pragma omp single
+        // delta_rat_count = int_alloc(nnode * nthreads);
+        
+        int nthread = s->nthread;
+        memset(s->scratch_array, 0, sizeof(int)*nnode*nthread);
+        // const auto ithread = omp_get_thread_num();
         #pragma omp for
         for (ri = 0; ri < bcount; ri++) {
+            int ithread = omp_get_thread_num();
+            
+            // outmsg("%d\n", ithread);
             int rid = ri+bstart;
             int onid = s->rat_position[rid];
             int nnid = fast_next_random_move(s, rid);
             s->rat_position[rid] = nnid;
         
-            #pragma omp atomic 
-            s->delta_rat_count[onid] -= 1;
+            // #pragma omp atomic 
+            onid = nthread * ithread + onid;
+            s->scratch_array[onid] -= 1;
             
-            #pragma omp atomic
-            s->delta_rat_count[nnid] += 1;
+            // #pragma omp atomic
+            nnid = nthread * ithread + nnid;
+            s->scratch_array[nnid] += 1;
         }
 
-        /* Must first update all rat counts and then recompute weights */
-        #pragma omp for 
+        // #pragma omp barrier
+
+        #pragma omp for
         for (ni = 0; ni < nnode; ni++) {
-            s->rat_count[ni] += s->delta_rat_count[ni];
-            // Clear count for future use 
-            s->delta_rat_count[ni] = 0;
+            int final_delta = 0;
+            for (ti = 0; ti < nthread; ti++) {
+                final_delta += s->scratch_array[nthread * ti + ni];
+            }
+            s->rat_count[ni] += final_delta;
         }
+
+        // free(delta_rat_count);
+
+        /* Must first update all rat counts and then recompute weights */
+        // #pragma omp for 
+        // for (ni = 0; ni < nnode; ni++) {
+        //     const int ithread = omp_get_thread_num();
+        //     for (ti = 0; ti < nthreads; ti++) {
+        //         s->rat_count[ni] += delta_rat_count[nthreads * ti + ni];
+        //         delta_rat_count[nthreads * ti + ni] = 0;
+        //     }
+        //     // Clear count for future use 
+        //     // delta_rat_count[nthreads * ithread + ni] = 0;
+        // }
     }
     #endif
 
