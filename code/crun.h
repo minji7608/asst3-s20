@@ -86,6 +86,8 @@ typedef struct {
 
     int* hub;
     int numhubs;
+    int* nonhub;
+    int numnonhubs;
 } graph_t;
 
 /* Representation of simulation state */

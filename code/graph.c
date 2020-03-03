@@ -22,6 +22,8 @@ graph_t *new_graph(int width, int height, int nedge) {
     ok = ok && g->ilf != NULL;
 	g->numhubs=0;
 	g->hub=calloc(nnode, sizeof(int));
+	g->nonhub = calloc(nnode, sizeof(int));
+	g->numnonhubs=0;
 	ok=ok && g->hub!= NULL;
     if (!ok) {
 	outmsg("Couldn't allocate graph data structures");
@@ -74,7 +76,9 @@ graph_t *read_graph(FILE *infile) {
     nnode = width * height;
     nid = -1;
 	int prevstart = 0;
+	int prevnonstart = 0;
 	int numhub = 0;
+	int numnonhub = 0;
     // We're going to add self edges, so eid will keep track of all edges.
     eid = 0;
     for (i = 0; i < nnode; i++) {
@@ -118,7 +122,11 @@ graph_t *read_graph(FILE *infile) {
 		if(eid-prevstart > 8){
 			g->hub[numhub++]=g->neighbor[prevstart];
 		}
+		else{
+			g->nonhub[numnonhub++]=g->neighbor[prevnonstart];
+		}
 		prevstart = eid;
+		prevnonstart = eid;
 	    // Self edge
 	    g->neighbor[eid++] = nid;
 	}
@@ -133,7 +141,11 @@ graph_t *read_graph(FILE *infile) {
 	if(eid - prevstart > 8){
 		g->hub[numhub++]=g->neighbor[prevstart];
 	}
+	else{
+		g->nonhub[numnonhub++]=g->neighbor[prevnonstart];
+	}
 	g->numhubs=numhub;
+	g->numnonhubs = numnonhub;
 #if DEBUG
     outmsg("Loaded graph with %d nodes and %d edges\n", nnode, nedge);
     show_graph(g);
