@@ -100,7 +100,7 @@ static inline void find_all_sums(state_t *s) {
     START_ACTIVITY(ACTIVITY_SUMS);
     int nid, eid, i;
     #if OMP
-    #pragma omp parallel for 
+    #pragma omp parallel for nowait
     for (i = 0; i < numberhubs; i++){
     double sum = 0.0;
     int hubid = g->hub[i];
