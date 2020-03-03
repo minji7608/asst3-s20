@@ -233,7 +233,7 @@ static inline void do_batch(state_t *s, int bstart, int bcount) {
         // delta_rat_count = int_alloc(nnode * nthreads);
         
         int nthread = s->nthread;
-        memset(s->scratch_array, 0, sizeof(int)*nnode*nthread);
+        // memset(s->scratch_array, 0, sizeof(int*) * nthread);
         // const auto ithread = omp_get_thread_num();
         #pragma omp for
         for (ri = 0; ri < bcount; ri++) {
@@ -246,12 +246,13 @@ static inline void do_batch(state_t *s, int bstart, int bcount) {
             s->rat_position[rid] = nnid;
         
             // #pragma omp atomic 
-            onid = nthread * ithread + onid;
-            s->scratch_array[onid] -= 1;
+            // onid = nthread * ithread + onid;
+            (s->scratch_array)[ithread][onid] -= 1;
             
             // #pragma omp atomic
-            nnid = nthread * ithread + nnid;
-            s->scratch_array[nnid] += 1;
+            // nnid = nthread * ithread + nnid;
+            (s->scratch_array)[ithread][nnid] += 1;
+            fprintf(stderr, "%d", *(s->scratch_array));
         }
 
         // #pragma omp barrier
@@ -260,7 +261,8 @@ static inline void do_batch(state_t *s, int bstart, int bcount) {
         for (ni = 0; ni < nnode; ni++) {
             int final_delta = 0;
             for (ti = 0; ti < nthread; ti++) {
-                final_delta += s->scratch_array[nthread * ti + ni];
+                final_delta += s->scratch_array[ti][ni];
+                s->scratch_array[ti][ni] = 0;
             }
             s->rat_count[ni] += final_delta;
         }
