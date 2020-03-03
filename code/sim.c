@@ -219,24 +219,20 @@ static inline void do_batch(state_t *s, int bstart, int bcount) {
     // int *delta_rat_count = s->delta_rat_count;
     
     int *delta_rat_count;
+    int nthread = s->nthread;
+
+    int array_size = nthread * nnode;
+
+    int sa[array_size];
+    memset(sa, 0, array_size * sizeof(int));
+    
     #pragma omp parallel
     {
         int ni, ri, ti;
 
-        // const int nthreads = omp_get_num_threads();
-        
-
-        // #pragma omp single
-        // delta_rat_count = new int[nnode*nthreads];
-        
-        // #pragma omp single
-        // delta_rat_count = int_alloc(nnode * nthreads);
-        
-        int nthread = s->nthread;
-        // memset(s->scratch_array, 0, sizeof(int*) * nthread);
-        // const auto ithread = omp_get_thread_num();
         #pragma omp for
         for (ri = 0; ri < bcount; ri++) {
+            int *scratch_array = sa;
             int ithread = omp_get_thread_num();
             
             // outmsg("%d\n", ithread);
@@ -245,24 +241,20 @@ static inline void do_batch(state_t *s, int bstart, int bcount) {
             int nnid = fast_next_random_move(s, rid);
             s->rat_position[rid] = nnid;
         
-            // #pragma omp atomic 
-            // onid = nthread * ithread + onid;
-            (s->scratch_array)[ithread][onid] -= 1;
+            scratch_array[nnode * ithread + onid] -= 1;
             
-            // #pragma omp atomic
-            // nnid = nthread * ithread + nnid;
-            (s->scratch_array)[ithread][nnid] += 1;
-            fprintf(stderr, "%d", *(s->scratch_array));
+            scratch_array[nnode * ithread + nnid] += 1;
         }
 
         // #pragma omp barrier
 
         #pragma omp for
         for (ni = 0; ni < nnode; ni++) {
+            int *scratch_array = sa;
             int final_delta = 0;
             for (ti = 0; ti < nthread; ti++) {
-                final_delta += s->scratch_array[ti][ni];
-                s->scratch_array[ti][ni] = 0;
+                final_delta += scratch_array[nnode * ti + ni];
+                scratch_array[nnode * ti + ni] = 0;
             }
             s->rat_count[ni] += final_delta;
         }
