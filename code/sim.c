@@ -67,6 +67,7 @@ static inline void compute_all_weights(state_t *s) {
     int i;
     graph_t *g = s->g;
     double *node_weight = s->node_weight;
+    int nnode = g->nnode;
 
     START_ACTIVITY(ACTIVITY_WEIGHTS);
     int nid;
@@ -74,20 +75,18 @@ static inline void compute_all_weights(state_t *s) {
     #if OMP
     #pragma omp parallel
     {
-        #pragma omp for nowait
+        #pragma omp for 
+        for (nid = g->numhubs; nid < nnode; nid++){
+            int nonhubid = g->hub[nid];
+            node_weight[nonhubid]= compute_weight(s, nonhubid);
+        }
+
+        #pragma omp for 
         for(i = 0; i < g->numhubs; i++){
             int hubid = g->hub[i];
             node_weight[hubid] = compute_weight(s, hubid);
         }
 
-        #pragma omp for 
-        for (nid = 0; nid < g->nnode; nid++){
-            int start = g->neighbor_start[nid];
-            int end = g->neighbor_start[nid+1];
-            if(end - start <= 8){
-                node_weight[nid] = compute_weight(s, nid);
-            }
-        }
     }
     #endif
     
@@ -100,18 +99,33 @@ static inline void find_all_sums(state_t *s) {
     graph_t *g = s->g;
     START_ACTIVITY(ACTIVITY_SUMS);
     int nid, eid;
+    int nnode = g->nnode;
     int i;
     #if OMP
-    #pragma omp for
-    for (nid = 0; nid < g->nnode; nid++) {
-	    double sum = 0.0;
-        int start = g->neighbor_start[nid];
-        int end = g->neighbor_start[nid+1];
-	    for (eid = g->neighbor_start[nid]; eid < g->neighbor_start[nid+1]; eid++) {
-	        sum += s->node_weight[g->neighbor[eid]];
-	        s->neighbor_accum_weight[eid] = sum;
-	    }
-	    s->sum_weight[nid] = sum;
+    #pragma omp parallel
+    {
+        #pragma omp for 
+        for (nid = g->numhubs; nid < nnode; nid++) {
+        double sum = 0.0;
+        int nonhubid = g->hub[nid];
+        for (eid = g->neighbor_start[nonhubid]; eid < g->neighbor_start[nonhubid+1]; eid++) {
+            sum += s->node_weight[g->neighbor[eid]];
+            s->neighbor_accum_weight[eid] = sum;
+        }
+        s->sum_weight[nonhubid] = sum;
+        }
+
+        #pragma omp for 
+        for (i = 0; i < g->numhubs; i++){
+        double sum = 0.0;
+        int hubid = g->hub[i];
+        for (eid = g->neighbor_start[hubid]; eid < g->neighbor_start[hubid+1]; eid++) {
+            sum += s->node_weight[g->neighbor[eid]];
+            s->neighbor_accum_weight[eid] = sum;
+        } 
+        s->sum_weight[hubid]=sum; 
+        }
+
     }
     
     #endif

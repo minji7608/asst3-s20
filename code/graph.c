@@ -74,7 +74,9 @@ graph_t *read_graph(FILE *infile) {
     nnode = width * height;
     nid = -1;
 	int prevstart = 0;
+	int prevnonstart = 0;
 	int numhub = 0;
+	int numnonhub = nnode;
     // We're going to add self edges, so eid will keep track of all edges.
     eid = 0;
     for (i = 0; i < nnode; i++) {
@@ -117,6 +119,10 @@ graph_t *read_graph(FILE *infile) {
 	    g->neighbor_start[nid] = eid;
 		if(eid-prevstart > 8){
 			g->hub[numhub++]=g->neighbor[prevstart];
+
+		}
+		else{
+			g->hub[numnonhub--]=g->neighbor[prevstart];
 		}
 		prevstart = eid;
 	    // Self edge
@@ -132,6 +138,9 @@ graph_t *read_graph(FILE *infile) {
     g->neighbor_start[nnode] = eid;
 	if(eid - prevstart > 8){
 		g->hub[numhub++]=g->neighbor[prevstart];
+	}
+	else{
+		g->hub[numnonhub--]=g->neighbor[prevstart];
 	}
 	g->numhubs=numhub;
 #if DEBUG
