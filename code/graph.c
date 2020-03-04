@@ -119,7 +119,7 @@ graph_t *read_graph(FILE *infile) {
 	    g->neighbor_start[nid] = eid;
 			
 		// if it's a hub 
-		if(eid-prevstart > 100){
+		if(eid-prevstart > 8){
 			g->hub[numhub++] = g->neighbor[prevstart];
 		}
 

@@ -79,13 +79,13 @@ static inline void compute_all_weights(state_t *s) {
         graph_t *gl = s->g;
     
 
-        #pragma omp for schedule(dynamic) nowait
+        #pragma omp for schedule(static) nowait
         for(nid = 0; nid < gl->numhubs; nid++){
             int hubid = gl->hub[nid];
             node_weight[hubid] = compute_weight(s, hubid);
         }
         
-        #pragma omp for
+        #pragma omp for schedule(dynamic, 128) nowait
         for (nid = gl->numhubs; nid < nnode; nid++){
             int nonhubid = gl->hub[nid];
             node_weight[nonhubid]= compute_weight(s, nonhubid);
@@ -135,20 +135,8 @@ static inline void find_all_sums(state_t *s) {
     {
         int nid, eid;
         graph_t *gl = s->g;
-        #pragma omp for nowait
-        for (nid = gl->numhubs; nid < nnode; nid++) {
-            double sum = 0.0;
-            int nonhubid = gl->hub[nid];
-            int start = gl->neighbor_start[nonhubid];
-            int end = gl->neighbor_start[nonhubid+1];
-            for (eid = start; eid < end; eid++) {
-                sum += s->node_weight[g->neighbor[eid]];
-                s->neighbor_accum_weight[eid] = sum;
-            }
-            s->sum_weight[nonhubid] = sum;
-        }
 
-        #pragma omp for 
+        #pragma omp for schedule(static) nowait
         for (nid = 0; nid < gl->numhubs; nid++){
             double sum = 0.0;
             int hubid = gl->hub[nid];
@@ -159,6 +147,19 @@ static inline void find_all_sums(state_t *s) {
                 s->neighbor_accum_weight[eid] = sum;
             } 
             s->sum_weight[hubid]=sum; 
+        }
+
+        #pragma omp for schedule(dynamic, 128) nowait
+        for (nid = gl->numhubs; nid < nnode; nid++) {
+            double sum = 0.0;
+            int nonhubid = gl->hub[nid];
+            int start = gl->neighbor_start[nonhubid];
+            int end = gl->neighbor_start[nonhubid+1];
+            for (eid = start; eid < end; eid++) {
+                sum += s->node_weight[g->neighbor[eid]];
+                s->neighbor_accum_weight[eid] = sum;
+            }
+            s->sum_weight[nonhubid] = sum;
         }
 
     }
@@ -286,6 +287,7 @@ static inline void do_batch(state_t *s, int bstart, int bcount) {
             }
         }
         */
+
 
         #pragma omp barrier
 
