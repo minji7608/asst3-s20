@@ -65,6 +65,7 @@ static inline void take_census(state_t *s) {
 static inline void compute_all_weights(state_t *s) {
     graph_t *g = s->g;
     double *node_weight = s->node_weight;
+    //int wid = g->width;
     int nnode = g->nnode;
 
     START_ACTIVITY(ACTIVITY_WEIGHTS);
@@ -129,6 +130,7 @@ static inline void find_all_sums(state_t *s) {
     START_ACTIVITY(ACTIVITY_SUMS);
     
     int nnode = g->nnode;
+    //int wid = g->width;
     int i;
     #if OMP
     #pragma omp parallel
@@ -262,7 +264,7 @@ static inline void do_batch(state_t *s, int bstart, int bcount) {
             local_sa[i]=0;
         }
 
-        #pragma omp for nowait
+        #pragma omp for schedule(static) nowait
         for (ri = 0; ri < bcount; ri++) {
             int rid = ri+bstart;
             int onid = s->rat_position[rid];

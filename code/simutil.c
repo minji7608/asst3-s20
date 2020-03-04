@@ -58,7 +58,7 @@ static state_t *new_rats(graph_t *g, int nrat, int nthread, random_t global_seed
     s->nthread = nthread;
     s->global_seed = global_seed;
     s->load_factor = (double) nrat / nnode;
-
+    
 
     // int i;
     // for (i=0; i < nthread; i++){
@@ -88,6 +88,8 @@ static state_t *new_rats(graph_t *g, int nrat, int nthread, random_t global_seed
     ok = ok && s->sum_weight != NULL;
     s->neighbor_accum_weight = double_alloc(g->nnode + g->nedge);
     ok = ok && s->neighbor_accum_weight != NULL;
+    s->delta_rat_count = int_alloc(nnode);
+    ok = ok && s->delta_rat_count != NULL;
     if (!ok) {
 	outmsg("Couldn't allocate space for %d rats", nrat);
 	return NULL;
