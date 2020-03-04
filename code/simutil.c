@@ -58,7 +58,6 @@ static state_t *new_rats(graph_t *g, int nrat, int nthread, random_t global_seed
     s->nthread = nthread;
     s->global_seed = global_seed;
     s->load_factor = (double) nrat / nnode;
-    // s->scratch_array = int_alloc(nnode * nwe);
 
     // int i;
     // for (i=0; i < nthread; i++){

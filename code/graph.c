@@ -74,7 +74,6 @@ graph_t *read_graph(FILE *infile) {
     nnode = width * height;
     nid = -1;
 	int prevstart = 0;
-	int prevnonstart = 0;
 	int numhub = 0;
 	int numnonhub = nnode;
     // We're going to add self edges, so eid will keep track of all edges.

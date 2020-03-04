@@ -55,7 +55,6 @@ static inline void take_census(state_t *s) {
     int nrat = s->nrat;
     int ri;
 
-
     for (ri = 0; ri < nrat; ri++) {
         rat_count[rat_position[ri]]++;
     }
@@ -69,9 +68,32 @@ static inline void compute_all_weights(state_t *s) {
     int nnode = g->nnode;
 
     START_ACTIVITY(ACTIVITY_WEIGHTS);
+    #if OMP
+    //double hub_weight[nnode];
+    //double nonhub_weight[nnode];
+    // memset(hub_weight, 0, sizeof(double)*nnode);
+    // memset(nonhub_weight, 0, sizeof(double)*nnode);
+    #pragma omp parallel
+    {
+        int nid;
+        graph_t *gl = s->g;
     
 
-    #if OMP
+        #pragma omp for schedule(dynamic) nowait
+        for(nid = 0; nid < gl->numhubs; nid++){
+            int hubid = gl->hub[nid];
+            node_weight[hubid] = compute_weight(s, hubid);
+        }
+        
+        #pragma omp for
+        for (nid = gl->numhubs; nid < nnode; nid++){
+            int nonhubid = gl->hub[nid];
+            node_weight[nonhubid]= compute_weight(s, nonhubid);
+        }
+
+
+    }
+    /*
     #pragma omp parallel
     {
         int nid;
@@ -79,16 +101,22 @@ static inline void compute_all_weights(state_t *s) {
         #pragma omp for 
         for (nid = gl->numhubs; nid < nnode; nid++){
             int nonhubid = gl->hub[nid];
-            node_weight[nonhubid]= compute_weight(s, nonhubid);
+            hub_weight[nid]= compute_weight(s, nonhubid);
         }
 
         #pragma omp for 
         for(nid = 0; nid < gl->numhubs; nid++){
             int hubid = gl->hub[nid];
-            node_weight[hubid] = compute_weight(s, hubid);
+            hub_weight[nid] = compute_weight(s, hubid);
         }
 
-    }
+        #pragma omp for
+        for(nid = 0; nid < nnode; nid++){
+            int id = gl->hub[nid];
+            node_weight[id]=hub_weight[nid];
+        }
+
+    }*/
     #endif
     
     FINISH_ACTIVITY(ACTIVITY_WEIGHTS);
@@ -111,18 +139,22 @@ static inline void find_all_sums(state_t *s) {
         for (nid = gl->numhubs; nid < nnode; nid++) {
             double sum = 0.0;
             int nonhubid = gl->hub[nid];
-            for (eid = gl->neighbor_start[nonhubid]; eid < gl->neighbor_start[nonhubid+1]; eid++) {
+            int start = gl->neighbor_start[nonhubid];
+            int end = gl->neighbor_start[nonhubid+1];
+            for (eid = start; eid < end; eid++) {
                 sum += s->node_weight[g->neighbor[eid]];
                 s->neighbor_accum_weight[eid] = sum;
             }
             s->sum_weight[nonhubid] = sum;
         }
 
-        #pragma omp for schedule(dynamic) nowait
+        #pragma omp for 
         for (nid = 0; nid < gl->numhubs; nid++){
             double sum = 0.0;
             int hubid = gl->hub[nid];
-            for (eid = gl->neighbor_start[hubid]; eid < gl->neighbor_start[hubid+1]; eid++) {
+            int start = gl->neighbor_start[hubid];
+            int end = gl->neighbor_start[hubid+1];
+            for (eid = start; eid < end; eid++) {
                 sum += s->node_weight[g->neighbor[eid]];
                 s->neighbor_accum_weight[eid] = sum;
             } 
@@ -204,75 +236,69 @@ static inline int fast_next_random_move(state_t *s, int r) {
 
 /* Process single batch */
 static inline void do_batch(state_t *s, int bstart, int bcount) {
-    
-    
-    
-
-
-    
-
     find_all_sums(s);
     START_ACTIVITY(ACTIVITY_NEXT);
     #if OMP
     graph_t *g = s->g;
     int nnode = g->nnode;
-    // int *delta_rat_count = s->delta_rat_count;
-    
+
     int *delta_rat_count;
     int nthread = s->nthread;
 
     int array_size = nthread * nnode;
 
     int sa[array_size];
-    memset(sa, 0, array_size * sizeof(int));
-    
+
     #pragma omp parallel
     {
-        int ni, ri, ti;
+        int ni, ri, ti, i, tid;
+        tid = omp_get_thread_num();
+        int *local_sa=&sa[tid*nnode];
 
-        #pragma omp for
+
+        //#pragma omp for schedule(static)
+        for(i=0; i<nnode; i++){
+            local_sa[i]=0;
+        }
+
+        #pragma omp for nowait
         for (ri = 0; ri < bcount; ri++) {
-            int *scratch_array = sa;
-            int ithread = omp_get_thread_num();
-            
-            // outmsg("%d\n", ithread);
             int rid = ri+bstart;
             int onid = s->rat_position[rid];
             int nnid = fast_next_random_move(s, rid);
             s->rat_position[rid] = nnid;
-        
-            scratch_array[nnode * ithread + onid] -= 1;
-            
-            scratch_array[nnode * ithread + nnid] += 1;
+            local_sa[onid] -= 1;
+            local_sa[nnid] += 1;
         }
-
-        // #pragma omp barrier
-
+        /*
         #pragma omp for
+        for (ri = 0; ri < bcount/nthread; ri+=nthread) {
+            fprintf(stderr, "%d",tid);
+            int binstart = ri + bstart + (bcount/nthread)*tid;
+            int binend = ri + bstart + (bcount/nthread)*(tid+1);
+            //fprintf(stderr, "%d %d %s %d %s", binstart, binend, "here", tid, "end");
+            for(j = binstart; j < binend; j++){
+                int onid = s->rat_position[j];
+                int nnid = fast_next_random_move(s, j);
+                s->rat_position[j] = nnid;
+                local_sa[onid] -= 1;
+                local_sa[nnid] += 1;
+            }
+        }
+        */
+
+        #pragma omp barrier
+
+        #pragma omp for nowait
         for (ni = 0; ni < nnode; ni++) {
-            int *scratch_array = sa;
             int final_delta = 0;
             for (ti = 0; ti < nthread; ti++) {
-                final_delta += scratch_array[nnode * ti + ni];
-                scratch_array[nnode * ti + ni] = 0;
+                final_delta += sa[nnode * ti + ni];
             }
             s->rat_count[ni] += final_delta;
         }
-
-        // free(delta_rat_count);
-
-        /* Must first update all rat counts and then recompute weights */
-        // #pragma omp for 
-        // for (ni = 0; ni < nnode; ni++) {
-        //     const int ithread = omp_get_thread_num();
-        //     for (ti = 0; ti < nthreads; ti++) {
-        //         s->rat_count[ni] += delta_rat_count[nthreads * ti + ni];
-        //         delta_rat_count[nthreads * ti + ni] = 0;
-        //     }
-        //     // Clear count for future use 
-        //     // delta_rat_count[nthreads * ithread + ni] = 0;
-        // }
     }
+
     #endif
 
     FINISH_ACTIVITY(ACTIVITY_NEXT);
