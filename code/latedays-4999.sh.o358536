@@ -1,0 +1,205 @@
++++++++++++++++++ Benchmark uniAx12-step050-seed618-4999.txt
+Run #1:Running './crun-omp -g ./data/g-180x160-uniA.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.792 seconds
+         207 ms      6.9 %    startup
+        1569 ms     52.3 %    compute_weights
+         351 ms     11.7 %    compute_sums
+         863 ms     28.8 %    find_moves
+           7 ms      0.2 %    unknown
+        2998 ms    100.0 %    elapsed
+Run #2:Running './crun-omp -g ./data/g-180x160-uniA.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.820 seconds
+         206 ms      6.8 %    startup
+        1571 ms     51.9 %    compute_weights
+         355 ms     11.7 %    compute_sums
+         887 ms     29.3 %    find_moves
+           7 ms      0.2 %    unknown
+        3026 ms    100.0 %    elapsed
+Run #3:Running './crun-omp -g ./data/g-180x160-uniA.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.800 seconds
+         206 ms      6.9 %    startup
+        1570 ms     52.2 %    compute_weights
+         348 ms     11.6 %    compute_sums
+         873 ms     29.0 %    find_moves
+           7 ms      0.2 %    unknown
+        3006 ms    100.0 %    elapsed
+Run #1:Running './crun-soln -g ./data/g-180x160-uniA.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.642 seconds
+         198 ms      7.0 %    startup
+        1744 ms     61.4 %    compute_weights
+         249 ms      8.8 %    compute_sums
+         641 ms     22.6 %    find_moves
+           6 ms      0.2 %    unknown
+        2840 ms    100.0 %    elapsed
+Run #2:Running './crun-soln -g ./data/g-180x160-uniA.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.580 seconds
+         198 ms      7.1 %    startup
+        1724 ms     62.1 %    compute_weights
+         238 ms      8.6 %    compute_sums
+         610 ms     22.0 %    find_moves
+           5 ms      0.2 %    unknown
+        2778 ms    100.0 %    elapsed
+Run #3:Running './crun-soln -g ./data/g-180x160-uniA.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.584 seconds
+         198 ms      7.1 %    startup
+        1722 ms     61.9 %    compute_weights
+         243 ms      8.8 %    compute_sums
+         612 ms     22.0 %    find_moves
+           5 ms      0.2 %    unknown
+        2782 ms    100.0 %    elapsed
++++++++++++++++++ Benchmark uniBx12-step050-seed618-4999.txt
+Run #1:Running './crun-omp -g ./data/g-180x160-uniB.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.180 seconds
+         182 ms      7.7 %    startup
+        1165 ms     49.3 %    compute_weights
+         262 ms     11.1 %    compute_sums
+         745 ms     31.5 %    find_moves
+           7 ms      0.3 %    unknown
+        2363 ms    100.0 %    elapsed
+Run #2:Running './crun-omp -g ./data/g-180x160-uniB.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.157 seconds
+         183 ms      7.8 %    startup
+        1167 ms     49.9 %    compute_weights
+         257 ms     11.0 %    compute_sums
+         724 ms     31.0 %    find_moves
+           6 ms      0.3 %    unknown
+        2340 ms    100.0 %    elapsed
+Run #3:Running './crun-omp -g ./data/g-180x160-uniB.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.171 seconds
+         184 ms      7.8 %    startup
+        1166 ms     49.5 %    compute_weights
+         259 ms     11.0 %    compute_sums
+         738 ms     31.3 %    find_moves
+           7 ms      0.3 %    unknown
+        2355 ms    100.0 %    elapsed
+Run #1:Running './crun-soln -g ./data/g-180x160-uniB.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 1.944 seconds
+         175 ms      8.3 %    startup
+        1219 ms     57.5 %    compute_weights
+         176 ms      8.3 %    compute_sums
+         542 ms     25.6 %    find_moves
+           5 ms      0.3 %    unknown
+        2119 ms    100.0 %    elapsed
+Run #2:Running './crun-soln -g ./data/g-180x160-uniB.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 1.948 seconds
+         176 ms      8.3 %    startup
+        1216 ms     57.3 %    compute_weights
+         173 ms      8.2 %    compute_sums
+         552 ms     26.0 %    find_moves
+           5 ms      0.3 %    unknown
+        2124 ms    100.0 %    elapsed
+Run #3:Running './crun-soln -g ./data/g-180x160-uniB.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 1.940 seconds
+         175 ms      8.3 %    startup
+        1217 ms     57.5 %    compute_weights
+         173 ms      8.2 %    compute_sums
+         543 ms     25.7 %    find_moves
+           5 ms      0.3 %    unknown
+        2115 ms    100.0 %    elapsed
++++++++++++++++++ Benchmark fracCx12-step050-seed618-4999.txt
+Run #1:Running './crun-omp -g ./data/g-180x160-fracC.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.251 seconds
+         186 ms      7.6 %    startup
+        1218 ms     50.0 %    compute_weights
+         263 ms     10.8 %    compute_sums
+         761 ms     31.2 %    find_moves
+           7 ms      0.3 %    unknown
+        2437 ms    100.0 %    elapsed
+Run #2:Running './crun-omp -g ./data/g-180x160-fracC.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.261 seconds
+         187 ms      7.7 %    startup
+        1218 ms     49.8 %    compute_weights
+         266 ms     10.9 %    compute_sums
+         769 ms     31.4 %    find_moves
+           7 ms      0.3 %    unknown
+        2448 ms    100.0 %    elapsed
+Run #3:Running './crun-omp -g ./data/g-180x160-fracC.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.241 seconds
+         186 ms      7.7 %    startup
+        1222 ms     50.3 %    compute_weights
+         263 ms     10.9 %    compute_sums
+         748 ms     30.8 %    find_moves
+           7 ms      0.3 %    unknown
+        2427 ms    100.0 %    elapsed
+Run #1:Running './crun-soln -g ./data/g-180x160-fracC.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.075 seconds
+         178 ms      7.9 %    startup
+        1327 ms     58.9 %    compute_weights
+         179 ms      7.9 %    compute_sums
+         563 ms     25.0 %    find_moves
+           5 ms      0.3 %    unknown
+        2254 ms    100.0 %    elapsed
+Run #2:Running './crun-soln -g ./data/g-180x160-fracC.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.124 seconds
+         178 ms      7.8 %    startup
+        1353 ms     58.8 %    compute_weights
+         180 ms      7.9 %    compute_sums
+         583 ms     25.3 %    find_moves
+           5 ms      0.2 %    unknown
+        2302 ms    100.0 %    elapsed
+Run #3:Running './crun-soln -g ./data/g-180x160-fracC.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.081 seconds
+         180 ms      8.0 %    startup
+        1336 ms     59.1 %    compute_weights
+         180 ms      8.0 %    compute_sums
+         557 ms     24.7 %    find_moves
+           5 ms      0.3 %    unknown
+        2261 ms    100.0 %    elapsed
++++++++++++++++++ Benchmark fracDx12-step050-seed618-4999.txt
+Run #1:Running './crun-omp -g ./data/g-180x160-fracD.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.373 seconds
+         190 ms      7.4 %    startup
+        1286 ms     50.2 %    compute_weights
+         276 ms     10.8 %    compute_sums
+         803 ms     31.3 %    find_moves
+           6 ms      0.3 %    unknown
+        2563 ms    100.0 %    elapsed
+Run #2:Running './crun-omp -g ./data/g-180x160-fracD.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.343 seconds
+         190 ms      7.5 %    startup
+        1287 ms     50.8 %    compute_weights
+         272 ms     10.7 %    compute_sums
+         776 ms     30.6 %    find_moves
+           7 ms      0.3 %    unknown
+        2533 ms    100.0 %    elapsed
+Run #3:Running './crun-omp -g ./data/g-180x160-fracD.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.362 seconds
+         190 ms      7.4 %    startup
+        1286 ms     50.4 %    compute_weights
+         275 ms     10.8 %    compute_sums
+         793 ms     31.1 %    find_moves
+           6 ms      0.3 %    unknown
+        2552 ms    100.0 %    elapsed
+Run #1:Running './crun-soln -g ./data/g-180x160-fracD.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.388 seconds
+         184 ms      7.2 %    startup
+        1450 ms     56.4 %    compute_weights
+         251 ms      9.8 %    compute_sums
+         680 ms     26.5 %    find_moves
+           5 ms      0.2 %    unknown
+        2572 ms    100.0 %    elapsed
+Run #2:Running './crun-soln -g ./data/g-180x160-fracD.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.248 seconds
+         183 ms      7.6 %    startup
+        1460 ms     60.1 %    compute_weights
+         204 ms      8.4 %    compute_sums
+         577 ms     23.7 %    find_moves
+           5 ms      0.2 %    unknown
+        2432 ms    100.0 %    elapsed
+Run #3:Running './crun-soln -g ./data/g-180x160-fracD.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.227 seconds
+         182 ms      7.6 %    startup
+        1452 ms     60.3 %    compute_weights
+         201 ms      8.4 %    compute_sums
+         567 ms     23.5 %    find_moves
+           5 ms      0.2 %    unknown
+        2410 ms    100.0 %    elapsed
++++++++++++++++++
+Name	steps	threads	secs	NPM	BNPM	Ratio	Pts
+uniA	50	12	3.01	59.69	55.29	0.926	15
+uniB	50	12	2.35	46.61	42.15	0.904	14
+fracC	50	12	2.44	48.33	44.87	0.928	16
+fracD	50	12	2.54	50.44	48.00	0.952	16
+AVG:				51.27	47.58
+TOTAL:							61
+Test time for 12 threads = 60.63 secs.

@@ -1,0 +1,30 @@
++++++++++++++++++ Benchmark uniAx12-step050-seed618-4845.txt
+Run #1:Running './crun-omp -g ./data/g-180x160-uniA.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.793 seconds
+         240 ms      7.9 %    startup
+        1568 ms     51.7 %    compute_weights
+         348 ms     11.5 %    compute_sums
+         869 ms     28.6 %    find_moves
+           7 ms      0.2 %    unknown
+        3034 ms    100.0 %    elapsed
+Run #2:Running './crun-omp -g ./data/g-180x160-uniA.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+50 steps, 1008000 rats, 2.786 seconds
+         205 ms      6.9 %    startup
+        1570 ms     52.5 %    compute_weights
+         348 ms     11.7 %    compute_sums
+         859 ms     28.7 %    find_moves
+           7 ms      0.2 %    unknown
+        2992 ms    100.0 %    elapsed
+Run #3:Couldn't open output file './check/tstuniAx12-step050-seed618-4845.txt'
++++++++++++++++++ Benchmark uniBx12-step050-seed618-4845.txt
+Run #1:Running './crun-omp -g ./data/g-180x160-uniB.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+Execution of command './crun-omp -g ./data/g-180x160-uniB.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50' failed. [Errno 2] No such file or directory
++++++++++++++++++ Benchmark fracCx12-step050-seed618-4845.txt
+Run #1:Running './crun-omp -g ./data/g-180x160-fracC.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+Execution of command './crun-omp -g ./data/g-180x160-fracC.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50' failed. [Errno 2] No such file or directory
++++++++++++++++++ Benchmark fracDx12-step050-seed618-4845.txt
+Run #1:Running './crun-omp -g ./data/g-180x160-fracD.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+Execution of command './crun-omp -g ./data/g-180x160-fracD.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50' failed. [Errno 2] No such file or directory
++++++++++++++++++
+Name	steps	threads	secs	NPM	BNPM	Ratio	Pts
+Test time for 12 threads = 6.12 secs.

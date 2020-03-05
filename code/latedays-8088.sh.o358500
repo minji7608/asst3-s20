@@ -1,0 +1,15 @@
++++++++++++++++++ Benchmark uniAx12-step050-seed618-8088.txt
+Run #1:Running './crun-omp -g ./data/g-180x160-uniA.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+Execution of command './crun-omp -g ./data/g-180x160-uniA.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50' failed. [Errno 2] No such file or directory
++++++++++++++++++ Benchmark uniBx12-step050-seed618-8088.txt
+Run #1:Running './crun-omp -g ./data/g-180x160-uniB.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+Execution of command './crun-omp -g ./data/g-180x160-uniB.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50' failed. [Errno 2] No such file or directory
++++++++++++++++++ Benchmark fracCx12-step050-seed618-8088.txt
+Run #1:Running './crun-omp -g ./data/g-180x160-fracC.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+Execution of command './crun-omp -g ./data/g-180x160-fracC.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50' failed. [Errno 2] No such file or directory
++++++++++++++++++ Benchmark fracDx12-step050-seed618-8088.txt
+Run #1:Running './crun-omp -g ./data/g-180x160-fracD.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50'
+Execution of command './crun-omp -g ./data/g-180x160-fracD.gph -r ./data/r-180x160-r35.rats -u b -n 50 -t 12 -I -i 50' failed. [Errno 2] No such file or directory
++++++++++++++++++
+Name	steps	threads	secs	NPM	BNPM	Ratio	Pts
+Test time for 12 threads = 0.03 secs.
